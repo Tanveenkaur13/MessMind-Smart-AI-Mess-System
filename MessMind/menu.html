@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MessMind | Royal Weekly Menu</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body.manager-bg {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at top, #3b0a0a, #0f0f0f 80%);
+            font-family: 'Playfair Display', serif;
+            color: #f8f1e5;
+        }
+
+        .page-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .nav-tabs a {
+            color: #d4af37;
+            text-decoration: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            transition: 0.3s;
+            border: 1px solid transparent;
+            font-family: 'Cinzel', serif;
+        }
+
+        .nav-tabs a:hover,
+        .nav-tabs a.active {
+            background: rgba(212,175,55,0.2);
+            border: 1px solid #d4af37;
+            color: #fff;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: #d4af37;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.8rem;
+        }
+
+        .menu-card-large {
+            background: rgba(20, 10, 5, 0.9);
+            border: 1px solid #d4af37;
+            border-radius: 18px;
+            padding: 1.5rem;
+            box-shadow: 
+                0 0 20px rgba(212,175,55,0.25),
+                inset 0 0 10px rgba(212,175,55,0.2);
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .menu-card-large:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .menu-card-large::before {
+            content: "❖";
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #d4af37;
+            font-size: 1.2rem;
+        }
+
+        .day-header {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(212,175,55,0.4);
+            padding-bottom: 0.5rem;
+        }
+
+        .meal-item {
+            margin: 0.8rem 0;
+            padding: 1rem;
+            background: rgba(255, 215, 0, 0.05);
+            border-left: 4px solid #d4af37;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .meal-item:hover {
+            background: rgba(212,175,55,0.15);
+            transform: scale(1.02);
+        }
+
+        .meal-label {
+            color: #d4af37;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .meal-name {
+            color: #f8f1e5;
+            font-size: 1rem;
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+
+        .top-bar {
+            color: #cbd5e1;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .top-bar a {
+            color: #ef4444;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body class="manager-bg">
+    <div class="page-container">
+
+        <div class="site-header">
+            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="MessMind Logo" class="site-logo">
+            <div>
+                <div class="site-logo-text">MessMind</div>
+                <div class="site-logo-subtitle">Royal mess menu experience</div>
+            </div>
+        </div>
+
+        <div class="top-bar">
+            Welcome, <strong>{{ full_name }}</strong>
+            <a href="/logout">Logout</a>
+        </div>
+
+        <nav class="nav-tabs">
+            {% if user_role == 'student' %}
+                <a href="/student">Attendance</a>
+                <a href="/menu" class="active">Weekly Menu</a>
+                <a href="/complaints">Feedback</a>
+                <a href="/polls">Vote on Dishes</a>
+            {% else %}
+                <a href="/manager">Dashboard</a>
+                <a href="/menu" class="active">Weekly Menu</a>
+                <a href="/complaints">Complaints & Feedback</a>
+                <a href="/manager_polls">Student Voting</a>
+                <a href="/manager_donate">Donations</a>
+                <a href="/manager_notifications">Notifications</a>
+            {% endif %}
+        </nav>
+
+        <h1>👑 Royal Mess Menu 👑</h1>
+
+        <div class="menu-grid">
+            {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+            
+            {% for day_idx, meals in full_menu.items() %}
+            <div class="menu-card-large">
+
+                <div class="day-header">{{ days[day_idx] }}</div>
+
+                <div class="meal-item">
+                    <div class="meal-label">🌅 Breakfast</div>
+                    <div class="meal-name">{{ meals.Breakfast }}</div>
+                </div>
+
+                <div class="meal-item">
+                    <div class="meal-label">🍽️ Lunch</div>
+                    <div class="meal-name">{{ meals.Lunch }}</div>
+                </div>
+
+                <div class="meal-item">
+                    <div class="meal-label">🌙 Dinner</div>
+                    <div class="meal-name">{{ meals.Dinner }}</div>
+                </div>
+
+                <div class="meal-item">
+                    <div class="meal-label">🍰 Sweet</div>
+                    <div class="meal-name">{{ meals.Sweet }}</div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

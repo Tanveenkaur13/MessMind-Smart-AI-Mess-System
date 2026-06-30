@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>MessMind | Login</title>
+    <style>
+        body.login-page {
+            background: radial-gradient(circle at top, #f8fafc, #e2e8f0);
+            color: #0f172a;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+        }
+
+        body.manager-bg .glass-card::before {
+            display: none;
+        }
+
+        .site-logo {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .site-logo-text {
+            color: #111827;
+        }
+
+        .site-logo-subtitle {
+            color: #64748b;
+        }
+
+        h1, h1 span {
+            color: #0f172a;
+        }
+
+        .error-msg { color: #dc2626; font-size: 0.85rem; margin-top: 0.3rem; display: none; }
+        .success-msg { color: #059669; font-size: 0.85rem; margin-top: 0.3rem; display: none; }
+
+        input, select {
+            background: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+            border-radius: 12px !important;
+            padding: 0.9rem !important;
+            margin: 0.5rem 0 !important;
+            width: 100% !important;
+        }
+
+        select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 24px rgba(99, 102, 241, 0.18);
+        }
+
+        a { color: #4f46e5; }
+    </style>
+</head>
+<body class="flex-center manager-bg">
+    <div class="glass-card" style="width: 380px;">
+        <div class="site-header" style="justify-content:center; margin-bottom: 1rem;">
+            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="MessMind Logo" class="site-logo">
+            <div style="text-align:left;">
+                <div class="site-logo-text">MessMind</div>
+                <div class="site-logo-subtitle">Smart mess management</div>
+            </div>
+        </div>
+        
+        <div id="login-section">
+            <p style="color: #475569; text-align: center;">Access your analytics dashboard</p>
+            <input type="text" id="login-userid" placeholder="User ID / Roll No">
+            <div class="error-msg" id="login-userid-err"></div>
+            
+            <input type="password" id="login-password" placeholder="Password">
+            <div class="error-msg" id="login-password-err"></div>
+            
+            <div id="login-error" class="error-msg" style="text-align: center;"></div>
+            <button class="btn btn-primary" onclick="performLogin()" style="margin-top: 1rem;">Login</button>
+            <p style="color: #475569; text-align: center; font-size: 0.9rem; margin-top: 1.5rem;">
+                New here? <a href="#" onclick="toggleAuth()" style="color: var(--primary-glow);">Create Account</a>
+            </p>
+        </div>
+
+        <div id="register-section" style="display: none;">
+            <p style="color: #475569; text-align: center;">Join the smart mess community</p>
+            <input type="text" id="reg-fullname" placeholder="Full Name">
+            <div class="error-msg" id="reg-fullname-err"></div>
+            
+            <input type="text" id="reg-userid" placeholder="Roll Number">
+            <div class="error-msg" id="reg-userid-err"></div>
+            
+            <input type="password" id="reg-password" placeholder="Create Password">
+            <div class="error-msg" id="reg-password-err"></div>
+            
+            <select id="reg-role" style="margin: 0.5rem 0; width: 100%;">
+                <option value="student">Register as Student</option>
+                <option value="manager">Register as Manager</option>
+            </select>
+            <div class="error-msg" id="reg-role-err"></div>
+            
+            <div id="register-error" class="error-msg" style="text-align: center;"></div>
+            <div id="register-success" class="success-msg" style="text-align: center;"></div>
+            
+            <button class="btn btn-primary" onclick="performRegister()" style="margin-top: 1rem;">Register Now</button>
+            <p style="text-align: center; font-size: 0.9rem; margin-top: 1.5rem;">
+                Already have an account? <a href="#" onclick="toggleAuth()" style="color: var(--primary-glow);">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = 'student';
+
+        function toggleAuth() {
+            const login = document.getElementById('login-section');
+            const register = document.getElementById('register-section');
+            login.style.display = login.style.display === 'none' ? 'block' : 'none';
+            register.style.display = register.style.display === 'none' ? 'block' : 'none';
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.success-msg').forEach(el => el.style.display = 'none');
+        }
+
+        async function performRegister() {
+            clearErrors();
+            const fullName = document.getElementById('reg-fullname').value.trim();
+            const userId = document.getElementById('reg-userid').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const role = document.getElementById('reg-role').value;
+
+            // Validation - Check for empty/whitespace values
+            if (fullName === '' || fullName.length === 0) {
+                document.getElementById('reg-fullname-err').textContent = 'Full name is required and cannot be empty';
+                document.getElementById('reg-fullname-err').style.display = 'block';
+                return;
+            }
+            if (userId === '' || userId.length === 0) {
+                document.getElementById('reg-userid-err').textContent = 'User ID is required and cannot be empty';
+                document.getElementById('reg-userid-err').style.display = 'block';
+                return;
+            }
+            if (password === '' || password.length === 0) {
+                document.getElementById('reg-password-err').textContent = 'Password is required and cannot be empty';
+                document.getElementById('reg-password-err').style.display = 'block';
+                return;
+            }
+            if (password.length < 4) {
+                document.getElementById('reg-password-err').textContent = 'Password must be at least 4 characters';
+                document.getElementById('reg-password-err').style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        user_id: userId,
+                        password: password,
+                        user_role: role
+                    })
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('register-success').textContent = result.message;
+                    document.getElementById('register-success').style.display = 'block';
+                    document.getElementById('reg-fullname').value = '';
+                    document.getElementById('reg-userid').value = '';
+                    document.getElementById('reg-password').value = '';
+                    setTimeout(() => {
+                        toggleAuth();
+                    }, 2000);
+                } else {
+                    document.getElementById('register-error').textContent = result.message;
+                    document.getElementById('register-error').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                document.getElementById('register-error').textContent = 'Registration failed. Please try again.';
+                document.getElementById('register-error').style.display = 'block';
+            }
+        }
+
+        async function performLogin() {
+            clearErrors();
+            const userId = document.getElementById('login-userid').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            // Strict validation - reject empty values
+            if (userId === '' || userId.length === 0) {
+                document.getElementById('login-userid-err').textContent = 'User ID is required and cannot be empty';
+                document.getElementById('login-userid-err').style.display = 'block';
+                return;
+            }
+            if (password === '' || password.length === 0) {
+                document.getElementById('login-password-err').textContent = 'Password is required and cannot be empty';
+                document.getElementById('login-password-err').style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/auth_login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        password: password,
+                        role_check: currentRole
+                    })
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    window.location.href = result.redirect;
+                } else {
+                    document.getElementById('login-error').textContent = result.message;
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-error').textContent = 'Login failed. Please try again.';
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        // Allow Enter key to submit forms
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const loginSection = document.getElementById('login-section');
+                const registerSection = document.getElementById('register-section');
+                if (loginSection.style.display !== 'none') {
+                    performLogin();
+                } else if (registerSection.style.display !== 'none') {
+                    performRegister();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

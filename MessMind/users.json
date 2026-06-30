@@ -1,0 +1,52 @@
+{
+  "2203871": {
+    "full_name": "Tanveen Kaur Madaan",
+    "password": "scrypt:32768:8:1$H2G6xT30SsLK2Zqf$4f83a14ee59ebe95454e698d0f8cf8519a5395c3657159ff436a75f2154b13dcc499cf80326e7e028bc86f508c2d7288c30b1deb0ae0e3bd8584d9d68f14924a",
+    "role": "student"
+  },
+  "2203872": {
+    "full_name": "Chetan",
+    "password": "scrypt:32768:8:1$AnQ9rLcbyWdW18pL$c2ca5329302acbca4d6ea5fc6d73bb840a61715d6d3d2ea0289c0a8943f44ea1e566cbcbca673284bd5d7cd050f451234ae70f0cd7a5741b8a450e7be34c25ba",
+    "role": "manager"
+  },
+  "2203873": {
+    "full_name": "Chetan",
+    "password": "scrypt:32768:8:1$rBJWa8rsD082iy9a$2a69dd18e02d841a0687070c325115c980ac22439104696d0343011bf4ca84494a5706b6a05cd7540d266332dfd938263b09dee9ccf7e08b4bfc08310153100e",
+    "role": "manager"
+  },
+  "2203870": {
+    "full_name": "Prachi Yash",
+    "password": "scrypt:32768:8:1$RKMC2E2YWtnVwDNN$85de194be1931b22429540741d8e85fd94ead390bb7eba908175c20ec7ba8a5882209ffc91956e44ff8945f02037f389a36be5944e0c5547ed7eaafa99b4846a",
+    "role": "student"
+  },
+  "1": {
+    "full_name": "Seema",
+    "password": "scrypt:32768:8:1$vQWfZgczfLTBpR9e$8e8062a4dc34ca82c0f7564f60f054cf0f499a1c693b47487e0b9b82be5eabae657aa8bfcd12d07a1b4dfdca7e4eabceeed643771c668094ad8f64245ca218bb",
+    "role": "manager"
+  },
+  "22038711": {
+    "full_name": "Tanveen K",
+    "password": "scrypt:32768:8:1$pvPEiHmQTJCQCyqZ$47088c851aeffcf4ab498790e0f48f92a18e89f5f7f1bae897905df96791763cf0a683b42b155fca30ccd77a9e64afe4755fdc8dcf157e8340b8ae06582f9937",
+    "role": "student"
+  },
+  "123": {
+    "full_name": "Tanvi",
+    "password": "scrypt:32768:8:1$xx4tlDQkROSm662L$9d70cbedb0e139a96c459a04dca9b2596001f6858cb242a024e119b8210ce9c097b78d6cac8d43381401e965cd187a6168ecf1f2ff7b5bcc43af5529be020c66",
+    "role": "student"
+  },
+  "120": {
+    "full_name": "Navdeep",
+    "password": "scrypt:32768:8:1$WMNohopsuEpViOhb$64e59c33067f2ae3dd21aca10913f1f3df184e9f8c42809b986608f2bf03c1ec3c86c52ac27f05981ebefef6d2a1bc5a58d5a68db83fe4ad367c115273dbea73",
+    "role": "student"
+  },
+  "121": {
+    "full_name": "Man",
+    "password": "scrypt:32768:8:1$wGqiVVp7KeGUNKqa$fef596069b04769ebb55f9fe2ef534229d21475ccbe9bc0c7d407a42dc2d64dcb8a4a04f860c0bf105d2f54458a59730be4be7e199a8dd66b9d2ef910b611356",
+    "role": "manager"
+  },
+  "1703": {
+    "full_name": "Tanveen",
+    "password": "scrypt:32768:8:1$iPrfxNO67UNYcW6W$c876b07317bc82bfac9aba10e3460fc1f5938bd951f643393158ab7a2948b01559c5c6b4d4e349203b0c12f5b052b96dc905a3923f089487ab8cc243e5e88ef1",
+    "role": "student"
+  }
+}

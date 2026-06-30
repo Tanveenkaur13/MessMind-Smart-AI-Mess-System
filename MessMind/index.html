@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>MessMind | Manager Analytics</title>
+    <style>
+        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; }
+        .nav-tabs a { color: #94a3b8; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s; }
+        .nav-tabs a:hover, .nav-tabs a.active { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+    </style>
+</head>
+<body class="manager-bg">
+    <div class="admin-wrapper" style="display: block; padding: 2rem;">
+        <div class="site-header">
+            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="MessMind Logo" class="site-logo">
+            <div>
+                <div class="site-logo-text">MessMind</div>
+                <div class="site-logo-subtitle">Analytics dashboard</div>
+            </div>
+        </div>
+
+        <header class="dashboard-header" style="margin-bottom: 2rem;">
+            <h1>Analytics <span>Dashboard</span></h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="color: #e2e8f0;">Welcome, <strong>{{ full_name }}</strong></span>
+                <a href="/logout" class="logout-btn" style="text-decoration: none;">Logout</a>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <a href="/manager" class="active">Dashboard</a>
+            <a href="/menu">Weekly Menu</a>
+            <a href="/complaints">Complaints & Feedback</a>
+            <a href="/manager_polls">Student Voting</a>
+            <a href="/manager_donate">Donations</a>
+            <a href="/manager_notifications">Notifications</a>
+        </nav>
+
+        <main class="main-content" style="padding: 0;">
+            <div class="stats-grid">
+                <div class="glass-card tool-card">
+                    <h3>Plate Forecast Tool</h3>
+                    <div class="input-group">
+                        <select id="day">
+                            <option value="0">Monday</option><option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option><option value="3">Thursday</option>
+                            <option value="4">Friday</option><option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                        <select id="meal">
+                            <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+                        </select>
+                        <label>Meal Popularity Weight</label>
+                        <input type="range" id="menu" min="1" max="5" value="3">
+                        <button class="btn btn-primary" onclick="getPrediction()">Forecast Plates</button>
+                    </div>
+                </div>
+
+                <div class="glass-card monitoring-card">
+                    <div class="stat-box">
+                        <span class="label">AI Predicted</span>
+                        <h2 id="pred-val" class="text-purple">0</h2>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">Live Verified</span>
+                        <h2 id="live-count" class="text-green">{{ live }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card history-section">
+                <h3>Prediction History Logs</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Time</th><th>Meal Type</th><th>AI Forecast</th><th>Actual (Live)</th></tr>
+                        </thead>
+                        <tbody id="history-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Parchment Letter Modal for Menu Display -->
+    <div id="menu-modal">
+        <div class="parchment-letter">
+            <button class="close-parchment" onclick="closeMenuParchment()">×</button>
+            <div class="parchment-content" id="parchment-content">
+                <!-- Menu will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

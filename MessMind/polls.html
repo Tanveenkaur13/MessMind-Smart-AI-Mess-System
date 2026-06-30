@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>MessMind | Dish Voting</title>
+    <style>
+        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; flex-wrap: wrap; }
+        .nav-tabs a { color: #94a3b8; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s; }
+        .nav-tabs a:hover, .nav-tabs a.active { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+        .page-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+        .section { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 2rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; color: #94a3b8; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; color: #f8fafc; }
+        .form-group input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .success-msg { color: #10b981; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .error-msg { color: #ef4444; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .dishes-grid { display: grid; gap: 1rem; }
+        .dish-item { background: rgba(0,0,0,0.3); border: 2px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        .dish-item:hover { border-color: #6366f1; background: rgba(99,102,241,0.1); }
+        .dish-info { flex: 1; }
+        .dish-name { color: #f8fafc; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .vote-count { color: #94a3b8; font-size: 0.9rem; }
+        .vote-btn { padding: 0.6rem 1.5rem; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .vote-btn:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+        .vote-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.5; }
+        .voted-badge { background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
+        .results-grid { display: grid; gap: 0.8rem; }
+        .result-item { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; }
+        .result-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .result-name { color: #6366f1; font-weight: 600; }
+        .result-votes { color: #10b981; font-weight: 600; }
+        .result-bar { background: rgba(99,102,241,0.2); border-radius: 4px; height: 20px; overflow: hidden; }
+        .result-fill { background: linear-gradient(90deg, #6366f1, #4f46e5); height: 100%; border-radius: 4px; transition: width 0.5s; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; font-size: 0.75rem; color: white; }
+    </style>
+</head>
+<body class="manager-bg">
+    <div class="page-container">
+        <div style="color: #94a3b8; text-align: center; font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Welcome, <strong>{{ full_name }}</strong> | <a href="/logout" style="color: #ef4444; text-decoration: none;">Logout</a>
+        </div>
+
+        <nav class="nav-tabs">
+            <a href="/student">Attendance</a>
+            <a href="/menu">Weekly Menu</a>
+            <a href="/complaints">Feedback</a>
+            <a href="/polls" class="active">Vote on Dishes</a>
+        </nav>
+
+        <!-- Vote on Dishes Section -->
+        <div class="section">
+            <h2>Vote on Your <span style="color: #6366f1;">Favorite Dishes</span></h2>
+            <p style="color: #94a3b8; margin-bottom: 1.5rem;">Help us know what you like! Vote for dishes you want to see in our menu.</p>
+            
+            <div id="success-msg" class="success-msg"></div>
+            <div id="error-msg" class="error-msg"></div>
+
+            <div class="form-group">
+                <label for="dish-input">Suggest a Dish to Vote On</label>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="dish-input" placeholder="Enter dish name (e.g., Butter Chicken, Paneer Tikka)...">
+                    <button class="btn btn-primary" onclick="addDishPoll()" style="padding: 0.8rem 1.5rem; width: auto;">Add & Vote</button>
+                </div>
+            </div>
+
+            <h3 style="color: #e2e8f0; margin-top: 2rem; margin-bottom: 1rem;">Current Voting</h3>
+            <div id="dishes-container" class="dishes-grid">
+                <p style="color: #94a3b8; text-align: center;">Loading dishes...</p>
+            </div>
+        </div>
+
+        <!-- Poll Results Section -->
+        <div class="section">
+            <h2>Voting <span style="color: #6366f1;">Results</span></h2>
+            <div id="results-container" class="results-grid">
+                <p style="color: #94a3b8; text-align: center;">No votes yet</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userVotes = {};
+
+        async function loadPolls() {
+            try {
+                const res = await fetch('/get_polls');
+                const result = await res.json();
+                
+                if (result.success) {
+                    userVotes = result.user_votes || {};
+                    displayDishes(result.polls);
+                    loadResults();
+                }
+            } catch (error) {
+                console.error('Error loading polls:', error);
+            }
+        }
+
+        function displayDishes(polls) {
+            const container = document.getElementById('dishes-container');
+            
+            if (Object.keys(polls).length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No dishes in poll yet. Be the first to add one!</p>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(polls).map(([dish, data]) => {
+                const hasVoted = userVotes[dish];
+                return `
+                    <div class="dish-item">
+                        <div class="dish-info">
+                            <div class="dish-name">${dish}</div>
+                            <div class="vote-count">${data.votes} vote${data.votes !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            ${hasVoted ? '<div class="voted-badge">✓ Voted</div>' : ''}
+                            <button class="vote-btn" onclick="voteDish('${dish}')" ${hasVoted ? 'disabled' : ''}>
+                                ${hasVoted ? 'Voted' : 'Vote'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function voteDish(dishName) {
+            try {
+                const res = await fetch('/submit_vote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dish_name: dishName })
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('success-msg').textContent = '✓ ' + result.message;
+                    document.getElementById('success-msg').style.display = 'block';
+                    document.getElementById('error-msg').style.display = 'none';
+                    userVotes[dishName] = true;
+                    setTimeout(() => loadPolls(), 500);
+                } else {
+                    document.getElementById('error-msg').textContent = result.message;
+                    document.getElementById('error-msg').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('error-msg').textContent = 'Error voting. Please try again.';
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        async function addDishPoll() {
+            const dishInput = document.getElementById('dish-input');
+            const dishName = dishInput.value.trim();
+
+            if (!dishName) {
+                document.getElementById('error-msg').textContent = 'Please enter a dish name';
+                document.getElementById('error-msg').style.display = 'block';
+                return;
+            }
+
+            await voteDish(dishName);
+            dishInput.value = '';
+        }
+
+        async function loadResults() {
+            try {
+                const res = await fetch('/get_poll_results');
+                const result = await res.json();
+                
+                if (result.success && result.results.length > 0) {
+                    const maxVotes = Math.max(...result.results.map(r => r.votes), 1);
+                    const container = document.getElementById('results-container');
+                    
+                    container.innerHTML = result.results.map(poll => {
+                        const percentage = (poll.votes / maxVotes) * 100;
+                        return `
+                            <div class="result-item">
+                                <div class="result-header">
+                                    <div class="result-name">${poll.dish}</div>
+                                    <div class="result-votes">${poll.votes} vote${poll.votes !== 1 ? 's' : ''}</div>
+                                </div>
+                                <div class="result-bar">
+                                    <div class="result-fill" style="width: ${percentage}%">${Math.round(percentage)}%</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading results:', error);
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('dish-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addDishPoll();
+        });
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadPolls);
+        // Refresh results every 5 seconds
+        setInterval(loadResults, 5000);
+    </script>
+</body>
+</html>

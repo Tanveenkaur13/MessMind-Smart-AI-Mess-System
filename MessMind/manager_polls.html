@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>MessMind | Voting Analytics</title>
+
+    <style>
+        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; flex-wrap: wrap; }
+        .nav-tabs a { color: #94a3b8; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s; }
+        .nav-tabs a:hover, .nav-tabs a.active { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+
+        .page-container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+
+        .stats-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 1.5rem; text-align: center; }
+
+        .stat-value { color: #6366f1; font-size: 2rem; font-weight: 700; }
+        .stat-label { color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem; }
+
+        .results-grid { display: grid; gap: 1rem; }
+
+        .result-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px; padding: 1.5rem; }
+
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+
+        .dish-name { color: #f8fafc; font-size: 1.2rem; font-weight: 600; }
+
+        .vote-badge { background: rgba(99,102,241,0.2); color: #6366f1; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.95rem; font-weight: 600; }
+
+        .result-bar { background: rgba(0,0,0,0.3); border-radius: 8px; height: 30px; overflow: hidden; margin-bottom: 0.8rem; }
+
+        .result-fill { background: linear-gradient(90deg, #6366f1, #4f46e5); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 1rem; font-weight: 600; color: white; }
+
+        .result-stats { display: flex; justify-content: space-between; color: #94a3b8; font-size: 0.9rem; }
+
+        .rank-badge { background: rgba(99,102,241,0.2); color: #6366f1; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-right: 1rem; }
+
+        .empty-state { color: #94a3b8; text-align: center; padding: 1rem; }
+        .donation-panel { display: grid; gap: 1rem; margin-bottom: 2rem; }
+        .donation-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+        .donation-actions button { border: 1px solid rgba(99,102,241,0.4); color: #e2e8f0; background: transparent; padding: 0.85rem 1rem; border-radius: 0.75rem; cursor: pointer; transition: background 0.25s ease; }
+        .donation-actions button.active, .donation-actions button:hover { background: rgba(99,102,241,0.2); }
+        .donation-map { width: 100%; min-height: 360px; border: 1px solid rgba(99,102,241,0.3); border-radius: 14px; overflow: hidden; }
+        .donation-panel input { width: 100%; padding: 0.9rem 1rem; border-radius: 0.75rem; border: 1px solid rgba(148,163,184,0.4); color: white; background: rgba(15,23,42,0.9); }
+        .donation-panel .donation-result { background: rgba(15,23,42,0.8); padding: 1rem; border-radius: 12px; border: 1px solid rgba(99,102,241,0.15); }
+    </style>
+</head>
+
+<body class="manager-bg">
+
+<div class="page-container">
+
+    <div class="site-header">
+        <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="MessMind Logo" class="site-logo">
+        <div>
+            <div class="site-logo-text">MessMind</div>
+            <div class="site-logo-subtitle">Student voting</div>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-bottom:1rem;">
+        Welcome, <strong>{{ full_name }}</strong> | 
+        <a href="/logout" style="color:red;">Logout</a>
+    </div>
+
+    <nav class="nav-tabs">
+        <a href="/manager">Dashboard</a>
+        <a href="/menu">Weekly Menu</a>
+        <a href="/complaints">Complaints & Feedback</a>
+        <a href="/manager_polls" class="active">Student Voting</a>
+        <a href="/manager_donate">Donations</a>
+        <a href="/manager_notifications">Notifications</a>
+    </nav>
+
+    <!-- 🔥 LIVE FEED -->
+    <div class="glass-card" style="padding:2rem; margin-bottom:2rem;">
+        <h2>🔥 Live Student Demands</h2>
+
+        <div id="live-feed">
+            <div class="empty-state">Loading live activity...</div>
+        </div>
+    </div>
+
+    <!-- 📊 ANALYTICS -->
+    <div class="glass-card" style="padding:2rem;">
+        <h1 style="text-align:center;">Voting Analytics</h1>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div id="total-dishes" class="stat-value">0</div>
+                <div class="stat-label">Dishes</div>
+            </div>
+
+            <div class="stat-card">
+                <div id="total-votes" class="stat-value">0</div>
+                <div class="stat-label">Votes</div>
+            </div>
+
+            <div class="stat-card">
+                <div id="top-votes" class="stat-value">0</div>
+                <div class="stat-label">Top Votes</div>
+            </div>
+        </div>
+
+        <div id="results-container" class="results-grid">
+            <div class="empty-state">Loading...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// 📢 SEND MESSAGE
+async function sendMessage() {
+    const messageText = document.getElementById('message-text').value.trim();
+    const statusEl = document.getElementById('message-status');
+    
+    if (!messageText) {
+        statusEl.textContent = 'Please enter a message';
+        statusEl.style.color = 'red';
+        return;
+    }
+    
+    statusEl.textContent = 'Sending...';
+    statusEl.style.color = 'yellow';
+    
+    const res = await fetch('/send_message', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: messageText })
+    });
+    
+    const result = await res.json();
+    
+    if (result.success) {
+        statusEl.textContent = 'Message sent successfully!';
+        statusEl.style.color = 'green';
+        document.getElementById('message-text').value = '';
+    } else {
+        statusEl.textContent = result.message || 'Error sending message';
+        statusEl.style.color = 'red';
+    }
+}
+
+// 🔥 LIVE FEED
+async function loadLiveFeed() {
+    const res = await fetch('/get_poll_activity');
+    const result = await res.json();
+
+    const container = document.getElementById('live-feed');
+
+    if (result.success && result.data.length > 0) {
+        container.innerHTML = result.data.map(item => `
+            <div style="background:#1e293b; padding:10px; margin-bottom:10px; border-radius:8px;">
+                <b>${item.dish}</b>
+                <span style="
+                    margin-left:10px;
+                    padding:3px 8px;
+                    border-radius:10px;
+                    background:${item.action === 'suggested' ? '#3b82f6' : '#10b981'};
+                    color:white;
+                    font-size:12px;
+                ">
+                    ${item.action}
+                </span>
+                <div style="font-size:12px; color:gray;">
+                    👤 ${item.student} | ${item.time}
+                </div>
+            </div>
+        `).join('');
+    } else {
+        container.innerHTML = "No activity yet";
+    }
+}
+
+
+// 📊 ANALYTICS
+async function loadVotingData() {
+    const res = await fetch('/get_poll_results');
+    const result = await res.json();
+
+    if (result.success && result.results.length > 0) {
+        const results = result.results;
+        const totalVotes = results.reduce((sum, r) => sum + r.votes, 0);
+
+        document.getElementById('total-dishes').textContent = results.length;
+        document.getElementById('total-votes').textContent = totalVotes;
+        document.getElementById('top-votes').textContent = results[0].votes;
+
+        const container = document.getElementById('results-container');
+
+        container.innerHTML = results.map((poll, index) => `
+            <div class="result-card">
+                <div class="result-header">
+                    <div style="display:flex;">
+                        <div class="rank-badge">${index + 1}</div>
+                        <div class="dish-name">${poll.dish}</div>
+                    </div>
+                    <div class="vote-badge">${poll.votes} votes</div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function setActiveDonationButton(type) {
+    const buttons = ['Orphanage', 'Gaushala', 'Old Age Home'];
+    buttons.forEach(key => {
+        const btn = document.getElementById('donation-' + key.toLowerCase().replace(/ /g, '-'));
+        if (btn) btn.classList.toggle('active', key === type);
+    });
+}
+
+function selectDonationType(type) {
+    document.donationType = type;
+    setActiveDonationButton(type);
+}
+
+function createMapUrl(query, lat, lon) {
+    const encoded = encodeURIComponent(query);
+    if (lat && lon) {
+        return `https://www.google.com/maps?q=${encoded}&ll=${lat},${lon}&z=14&output=embed`;
+    }
+    return `https://www.google.com/maps?q=${encoded}&z=14&output=embed`;
+}
+
+function updateDonationStatus(message, color = '#cbd5e1') {
+    const statusEl = document.getElementById('donation-status');
+    statusEl.textContent = message;
+    statusEl.style.color = color;
+}
+
+async function searchDonationPlaces() {
+    const locationInput = document.getElementById('donation-location').value.trim();
+    const type = document.donationType || 'Orphanage';
+    const query = `${type} near ${locationInput || 'me'}`;
+    const mapFrame = document.getElementById('donation-map');
+
+    updateDonationStatus(`Searching nearby ${type.toLowerCase()}...`);
+
+    if (!locationInput && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            mapFrame.src = createMapUrl(query, lat, lon);
+            updateDonationStatus(`Showing nearby ${type.toLowerCase()} using your current location.`,'#a3e635');
+        }, () => {
+            mapFrame.src = createMapUrl(query);
+            updateDonationStatus(`Unable to access location. Showing search results by keyword.`,'#facc15');
+        });
+    } else {
+        mapFrame.src = createMapUrl(query);
+        updateDonationStatus(`Showing nearby ${type.toLowerCase()} for "${locationInput || 'current location'}".`,'#a3e635');
+    }
+}
+
+// RUN BOTH
+document.addEventListener('DOMContentLoaded', () => {
+    loadLiveFeed();
+    loadVotingData();
+    selectDonationType('Orphanage');
+
+    setInterval(loadLiveFeed, 5000);
+    setInterval(loadVotingData, 10000);
+});
+</script>
+
+</body>
+</html>

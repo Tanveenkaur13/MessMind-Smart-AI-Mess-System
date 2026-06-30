@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>MessMind | Feedback & Complaints</title>
+    <style>
+        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; flex-wrap: wrap; }
+        .nav-tabs a { color: #94a3b8; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s; }
+        .nav-tabs a:hover, .nav-tabs a.active { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
+        .page-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+        .form-section { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 2rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; color: #94a3b8; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; color: #f8fafc; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .success-msg { color: #10b981; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .error-msg { color: #ef4444; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .complaints-list { display: flex; flex-direction: column; gap: 1rem; }
+        .complaint-item { background: rgba(30, 41, 59, 0.6); border-left: 4px solid #6366f1; border-radius: 8px; padding: 1.5rem; }
+        .complaint-header { display: flex; justify-content: space-between; margin-bottom: 0.8rem; }
+        .complaint-name { color: #6366f1; font-weight: 600; }
+        .complaint-time { color: #94a3b8; font-size: 0.85rem; }
+        .complaint-type { display: inline-block; background: rgba(99,102,241,0.2); color: #6366f1; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; margin-bottom: 0.8rem; }
+        .complaint-text { color: #e2e8f0; line-height: 1.5; }
+    </style>
+</head>
+<body class="manager-bg">
+    <div class="page-container">
+        <div class="site-header">
+            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="MessMind Logo" class="site-logo">
+            <div>
+                <div class="site-logo-text">MessMind</div>
+                <div class="site-logo-subtitle">Smart mess management</div>
+            </div>
+        </div>
+
+        <div style="color: #94a3b8; text-align: center; font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Welcome, <strong>{{ full_name }}</strong> | <a href="/logout" style="color: #ef4444; text-decoration: none;">Logout</a>
+        </div>
+
+        <nav class="nav-tabs">
+            {% if user_role == 'student' %}
+                <a href="/student">Attendance</a>
+                <a href="/menu">Weekly Menu</a>
+                <a href="/complaints" class="active">Feedback</a>
+                <a href="/polls">Vote on Dishes</a>
+            {% else %}
+                <a href="/manager">Dashboard</a>
+                <a href="/menu">Weekly Menu</a>
+                <a href="/complaints" class="active">Complaints & Feedback</a>
+                <a href="/manager_polls">Student Voting</a>
+                <a href="/manager_donate">Donations</a>
+                <a href="/manager_notifications">Notifications</a>
+            {% endif %}
+        </nav>
+
+        <!-- Submit Complaint Form (Only for Students) -->
+        {% if user_role == 'student' %}
+        <div class="form-section">
+            <h2>Submit <span style="color: #6366f1;">Feedback</span></h2>
+            <div id="success-msg" class="success-msg"></div>
+            <div id="error-msg" class="error-msg"></div>
+            
+            <form id="complaint-form" onsubmit="submitComplaint(event)">
+                <div class="form-group">
+                    <label for="complaint-type">Feedback Category *</label>
+                    <select id="complaint-type" required>
+                        <option value="">Select a category</option>
+                        <option value="Food Quality">Food Quality</option>
+                        <option value="Food Quantity">Food Quantity</option>
+                        <option value="Hygiene">Cleanliness & Hygiene</option>
+                        <option value="Suggestion">Suggestion/Request</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="complaint-desc">Your Feedback *</label>
+                    <textarea id="complaint-desc" placeholder="Please describe your feedback or suggestion..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: auto; padding: 0.75rem 2rem;">Submit Feedback</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Complaints Display -->
+        <div class="form-section">
+            <h2>Recent <span style="color: #6366f1;">Feedback</span></h2>
+            <div id="complaints-container" class="complaints-list">
+                <p style="color: #94a3b8; text-align: center;">Loading feedback...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function submitComplaint(event) {
+            event.preventDefault();
+            
+            const type = document.getElementById('complaint-type').value;
+            const description = document.getElementById('complaint-desc').value;
+            
+            if (!type || !description.trim()) {
+                document.getElementById('error-msg').textContent = 'All fields are required';
+                document.getElementById('error-msg').style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/submit_complaint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: type, description: description })
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('success-msg').textContent = result.message;
+                    document.getElementById('success-msg').style.display = 'block';
+                    document.getElementById('error-msg').style.display = 'none';
+                    document.getElementById('complaint-form').reset();
+                    setTimeout(() => loadComplaints(), 1000);
+                } else {
+                    document.getElementById('error-msg').textContent = result.message;
+                    document.getElementById('error-msg').style.display = 'block';
+                    document.getElementById('success-msg').style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('error-msg').textContent = 'Error submitting feedback';
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        async function loadComplaints() {
+            try {
+                const res = await fetch('/get_complaints');
+                const result = await res.json();
+                
+                if (result.success && result.complaints.length > 0) {
+                    const container = document.getElementById('complaints-container');
+                    container.innerHTML = result.complaints.map(complaint => `
+                        <div class="complaint-item">
+                            <div class="complaint-header">
+                                <div>
+                                    <div class="complaint-name">${complaint.user_name}</div>
+                                    <div class="complaint-type">${complaint.type}</div>
+                                </div>
+                                <div class="complaint-time">${complaint.timestamp}</div>
+                            </div>
+                            <div class="complaint-text">${complaint.description}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('complaints-container').innerHTML = '<p style="color: #94a3b8; text-align: center;">No feedback yet</p>';
+                }
+            } catch (error) {
+                console.error('Error loading complaints:', error);
+            }
+        }
+
+        // Load complaints on page load
+        document.addEventListener('DOMContentLoaded', loadComplaints);
+    </script>
+</body>
+</html>
