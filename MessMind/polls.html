@@ -4,40 +4,38 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>MessMind | Dish Voting</title>
     <style>
-        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; flex-wrap: wrap; }
-        .nav-tabs a { color: #94a3b8; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s; }
-        .nav-tabs a:hover, .nav-tabs a.active { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
         .page-container { max-width: 900px; margin: 0 auto; padding: 2rem; }
-        .section { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 2rem; margin-bottom: 2rem; }
+        .section { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(28,25,23,0.08); border-radius: 15px; padding: 2rem; margin-bottom: 2rem; }
         .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; color: #94a3b8; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
-        .form-group input { width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; color: #f8fafc; }
-        .form-group input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
-        .success-msg { color: #10b981; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
-        .error-msg { color: #ef4444; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .form-group label { display: block; color: #78716c; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.03); border: 1px solid rgba(249,115,22,0.3); border-radius: 8px; color: #2d2a26; }
+        .form-group input:focus { outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+        .success-msg { color: #16a34a; padding: 1rem; background: rgba(22, 163, 74, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .error-msg { color: #dc2626; padding: 1rem; background: rgba(220, 38, 38, 0.1); border-radius: 8px; margin-bottom: 1rem; display: none; }
         .dishes-grid { display: grid; gap: 1rem; }
-        .dish-item { background: rgba(0,0,0,0.3); border: 2px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
-        .dish-item:hover { border-color: #6366f1; background: rgba(99,102,241,0.1); }
+        .dish-item { background: rgba(0,0,0,0.04); border: 2px solid rgba(249,115,22,0.2); border-radius: 10px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.25s ease; animation: fadeSlideUp 0.4s ease both; }
+        .dish-item:hover { border-color: #f97316; background: rgba(249,115,22,0.1); transform: translateY(-2px); box-shadow: 0 12px 26px -14px rgba(120,72,32,0.25); }
         .dish-info { flex: 1; }
-        .dish-name { color: #f8fafc; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
-        .vote-count { color: #94a3b8; font-size: 0.9rem; }
-        .vote-btn { padding: 0.6rem 1.5rem; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-        .vote-btn:hover { background: #4f46e5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
-        .vote-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.5; }
-        .voted-badge { background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
+        .dish-name { color: #2d2a26; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .vote-count { color: #78716c; font-size: 0.9rem; }
+        .vote-btn { padding: 0.6rem 1.5rem; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .vote-btn:hover { background: #ea580c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4); }
+        .vote-btn:disabled { background: #78716c; cursor: not-allowed; opacity: 0.5; }
+        .voted-badge { background: rgba(22, 163, 74, 0.2); color: #16a34a; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
         .results-grid { display: grid; gap: 0.8rem; }
-        .result-item { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; }
+        .result-item { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 1rem; transition: transform 0.2s ease; animation: fadeSlideUp 0.4s ease both; }
+        .result-item:hover { transform: translateY(-2px); }
         .result-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-        .result-name { color: #6366f1; font-weight: 600; }
-        .result-votes { color: #10b981; font-weight: 600; }
-        .result-bar { background: rgba(99,102,241,0.2); border-radius: 4px; height: 20px; overflow: hidden; }
-        .result-fill { background: linear-gradient(90deg, #6366f1, #4f46e5); height: 100%; border-radius: 4px; transition: width 0.5s; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; font-size: 0.75rem; color: white; }
+        .result-name { color: #f97316; font-weight: 600; }
+        .result-votes { color: #16a34a; font-weight: 600; }
+        .result-bar { background: rgba(249,115,22,0.2); border-radius: 4px; height: 20px; overflow: hidden; }
+        .result-fill { background: linear-gradient(90deg, #f97316, #ea580c); height: 100%; border-radius: 4px; transition: width 0.5s; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; font-size: 0.75rem; color: white; }
     </style>
 </head>
 <body class="manager-bg">
     <div class="page-container">
-        <div style="color: #94a3b8; text-align: center; font-size: 0.9rem; margin-bottom: 1.5rem;">
-            Welcome, <strong>{{ full_name }}</strong> | <a href="/logout" style="color: #ef4444; text-decoration: none;">Logout</a>
+        <div style="color: #78716c; text-align: center; font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Welcome, <strong>{{ full_name }}</strong> | <a href="/logout" style="color: #dc2626; text-decoration: none;">Logout</a>
         </div>
 
         <nav class="nav-tabs">
@@ -49,8 +47,8 @@
 
         <!-- Vote on Dishes Section -->
         <div class="section">
-            <h2>Vote on Your <span style="color: #6366f1;">Favorite Dishes</span></h2>
-            <p style="color: #94a3b8; margin-bottom: 1.5rem;">Help us know what you like! Vote for dishes you want to see in our menu.</p>
+            <h2>Vote on Your <span style="color: #f97316;">Favorite Dishes</span></h2>
+            <p style="color: #78716c; margin-bottom: 1.5rem;">Help us know what you like! Vote for dishes you want to see in our menu.</p>
             
             <div id="success-msg" class="success-msg"></div>
             <div id="error-msg" class="error-msg"></div>
@@ -63,17 +61,19 @@
                 </div>
             </div>
 
-            <h3 style="color: #e2e8f0; margin-top: 2rem; margin-bottom: 1rem;">Current Voting</h3>
+            <h3 style="color: #44403c; margin-top: 2rem; margin-bottom: 1rem;">Current Voting</h3>
             <div id="dishes-container" class="dishes-grid">
-                <p style="color: #94a3b8; text-align: center;">Loading dishes...</p>
+                <div class="skeleton-line" style="width: 90%;"></div>
+                <div class="skeleton-line" style="width: 70%;"></div>
             </div>
         </div>
 
         <!-- Poll Results Section -->
         <div class="section">
-            <h2>Voting <span style="color: #6366f1;">Results</span></h2>
+            <h2>Voting <span style="color: #f97316;">Results</span></h2>
             <div id="results-container" class="results-grid">
-                <p style="color: #94a3b8; text-align: center;">No votes yet</p>
+                <div class="skeleton-line" style="width: 80%;"></div>
+                <div class="skeleton-line" style="width: 55%;"></div>
             </div>
         </div>
     </div>
@@ -100,14 +100,14 @@
             const container = document.getElementById('dishes-container');
             
             if (Object.keys(polls).length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; text-align: center; grid-column: 1/-1;">No dishes in poll yet. Be the first to add one!</p>';
+                container.innerHTML = '<p style="color: #78716c; text-align: center; grid-column: 1/-1;">No dishes in poll yet. Be the first to add one!</p>';
                 return;
             }
 
-            container.innerHTML = Object.entries(polls).map(([dish, data]) => {
+            container.innerHTML = Object.entries(polls).map(([dish, data], i) => {
                 const hasVoted = userVotes[dish];
                 return `
-                    <div class="dish-item">
+                    <div class="dish-item" style="animation-delay: ${Math.min(i * 0.05, 0.4)}s;">
                         <div class="dish-info">
                             <div class="dish-name">${dish}</div>
                             <div class="vote-count">${data.votes} vote${data.votes !== 1 ? 's' : ''}</div>
@@ -166,25 +166,37 @@
             try {
                 const res = await fetch('/get_poll_results');
                 const result = await res.json();
-                
+                const container = document.getElementById('results-container');
+
                 if (result.success && result.results.length > 0) {
                     const maxVotes = Math.max(...result.results.map(r => r.votes), 1);
-                    const container = document.getElementById('results-container');
-                    
-                    container.innerHTML = result.results.map(poll => {
+
+                    container.innerHTML = result.results.map((poll, i) => {
                         const percentage = (poll.votes / maxVotes) * 100;
                         return `
-                            <div class="result-item">
+                            <div class="result-item" style="animation-delay: ${Math.min(i * 0.05, 0.4)}s;">
                                 <div class="result-header">
                                     <div class="result-name">${poll.dish}</div>
                                     <div class="result-votes">${poll.votes} vote${poll.votes !== 1 ? 's' : ''}</div>
                                 </div>
                                 <div class="result-bar">
-                                    <div class="result-fill" style="width: ${percentage}%">${Math.round(percentage)}%</div>
+                                    <div class="result-fill" data-target="${percentage}" style="width: 0%"></div>
                                 </div>
                             </div>
                         `;
                     }).join('');
+
+                    // Animate bars in from 0% (CSS already transitions width). Double rAF
+                    // ensures the browser has committed the 0% state before we animate.
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        container.querySelectorAll('.result-fill').forEach(el => {
+                            const pct = parseFloat(el.getAttribute('data-target'));
+                            el.style.width = pct + '%';
+                            el.textContent = Math.round(pct) + '%';
+                        });
+                    }));
+                } else if (result.success) {
+                    container.innerHTML = '<p style="color: #78716c; text-align: center;">No votes yet</p>';
                 }
             } catch (error) {
                 console.error('Error loading results:', error);
@@ -201,5 +213,6 @@
         // Refresh results every 5 seconds
         setInterval(loadResults, 5000);
     </script>
+    <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
 </body>
 </html>

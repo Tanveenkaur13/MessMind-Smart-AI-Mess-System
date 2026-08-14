@@ -48,5 +48,10 @@
     "full_name": "Tanveen",
     "password": "scrypt:32768:8:1$iPrfxNO67UNYcW6W$c876b07317bc82bfac9aba10e3460fc1f5938bd951f643393158ab7a2948b01559c5c6b4d4e349203b0c12f5b052b96dc905a3923f089487ab8cc243e5e88ef1",
     "role": "student"
+  },
+  "50": {
+    "full_name": "Tanveen kaur",
+    "password": "scrypt:32768:8:1$IWw0xCQHCC7zOMJB$565492a6a5d13bc9b69db9e54d81cf0758286fea01ab8288bd0139ff9f9a7b9ccc3901597230aa8781d0d0433124ac9b440f3285fe874209457688498eebfd16",
+    "role": "student"
   }
 }

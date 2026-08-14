@@ -1,15 +1,44 @@
 :root {
-    --bg-dark: #020617;
-    --glass-bg: rgba(30, 41, 59, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --primary-glow: #6366f1;
-    --accent-green: #10b981;
-    --accent-red: #ef4444;
-    --text-main: #f8fafc;
+    /* MessMind — warm, light palette */
+    --bg-start: #fdf8f3;
+    --bg-end: #fef3e8;
+
+    --surface: rgba(255, 255, 255, 0.85);
+    --surface-solid: #ffffff;
+    --border: rgba(28, 25, 23, 0.08);
+
+    --text-main: #2d2a26;
+    --text-muted: #78716c;
+    --text-heading: #1c1917;
+
+    --primary: #f97316;      /* warm orange — main actions */
+    --primary-dark: #ea580c;
+    --primary-soft: rgba(249, 115, 22, 0.12);
+    --primary-border: rgba(249, 115, 22, 0.3);
+
+    --green: #16a34a;         /* fresh green — success/present */
+    --green-soft: rgba(22, 163, 74, 0.12);
+    --red: #dc2626;           /* coral red — alerts/skip */
+    --red-soft: rgba(220, 38, 38, 0.1);
+    --amber: #f59e0b;         /* amber — sweets/highlights */
+
+    /* Backward-compat aliases: some templates reference these var names directly */
+    --primary-glow: var(--primary);
+    --purple: var(--primary);
+    --yellow: var(--amber);
+    --glass-bg: var(--surface);
+    --glass-border: var(--border);
+    --glass: var(--surface);
+    --slate-muted: var(--text-muted);
+    --slate-dark: var(--surface-solid);
+    --slate-bg: var(--bg-start);
+    --accent-green: var(--green);
+    --accent-red: var(--red);
+    --bg-dark: var(--bg-start);
 }
 
 body {
-    background: radial-gradient(circle at top right, #1e1b4b, #020617);
+    background: radial-gradient(circle at top right, var(--bg-end), var(--bg-start));
     color: var(--text-main);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
@@ -27,21 +56,21 @@ body {
     width: 52px;
     height: 52px;
     border-radius: 18px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(249, 115, 22, 0.08);
     padding: 0.5rem;
     display: block;
     object-fit: contain;
 }
 
 .site-logo-text {
-    color: #f8fafc;
+    color: var(--text-heading);
     font-size: 1.6rem;
     font-weight: 800;
     letter-spacing: 0.08em;
 }
 
 .site-logo-subtitle {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.92rem;
 }
 
@@ -54,16 +83,38 @@ body {
 
 /* Glassmorphism Card Style */
 .glass-card {
-    background: var(--glass-bg);
+    background: var(--surface);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border);
     border-radius: 24px;
     padding: 2rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 45px -20px rgba(120, 72, 32, 0.18);
+    position: relative;
+    overflow: hidden;
 }
 
-h1 span { color: var(--primary-glow); }
+/* Semi-transparent chef hat accent in the corner of glass cards */
+.glass-card::before {
+    content: "👨‍🍳";
+    font-size: 3rem;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 0;
+}
+
+h1 span, h2 span { color: var(--primary); font-weight: 800; }
+
+/* Page backgrounds — kept plain and warm so cards stay the focal point */
+.manager-bg, .student-bg {
+    background: radial-gradient(circle at top right, var(--bg-end), var(--bg-start));
+    color: var(--text-main);
+    margin: 0;
+    min-height: 100vh;
+}
 
 /* Dashboard Layout */
 .admin-wrapper {
@@ -73,11 +124,13 @@ h1 span { color: var(--primary-glow); }
 
 .sidebar {
     width: 320px;
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--surface-solid);
     backdrop-filter: blur(10px);
-    border-right: 1px solid var(--glass-border);
+    border-right: 1px solid var(--border);
     padding: 1.5rem;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-content {
@@ -86,36 +139,69 @@ h1 span { color: var(--primary-glow); }
     overflow-y: auto;
 }
 
+/* Dashboard Header & Logout */
+.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.logout-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+.logout-btn:hover { background: var(--primary-soft); color: var(--primary-dark); }
+
+/* Grid for Tool and Monitoring */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+
+.stat-box h2 {
+    font-size: 4rem;
+    margin: 10px 0;
+    font-weight: 800;
+}
+
+.label { color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 600; }
+
+#pred-val, .text-purple { color: var(--primary); }
+#live-count, .text-green { color: var(--green); }
+
 /* UI Elements */
 .btn {
     border-radius: 12px;
     padding: 0.75rem 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     cursor: pointer;
     width: 100%;
+    margin-top: 1rem;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
     color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.28);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 25px rgba(249, 115, 22, 0.38);
 }
 
-input, select {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    color: white;
+input, select, textarea {
+    background: #fffaf3;
+    border: 1px solid rgba(28, 25, 23, 0.12);
+    color: var(--text-main);
     border-radius: 10px;
     padding: 0.8rem;
     margin: 0.5rem 0;
     width: 100%;
+    font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+input[type="range"] {
+    accent-color: var(--primary);
+    width: 100%;
+    margin: 15px 0;
 }
 
 /* Table Styling */
@@ -128,24 +214,18 @@ table {
 th {
     text-align: left;
     padding: 1rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 0.85rem;
     text-transform: uppercase;
 }
 
 td {
     padding: 1rem;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid var(--border);
 }
 
-/* Food Background for Student Portal */
-.student-bg {
-    background: linear-gradient(rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.8)), 
-                url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070') no-repeat center center fixed;
-    background-size: cover;
-}
-
-
+.pred-highlight { color: var(--primary); font-weight: 700; }
+.verified-highlight { color: var(--green); font-weight: 700; }
 
 .student-card {
     max-width: 450px;
@@ -156,338 +236,163 @@ td {
 .meal-section {
     margin-bottom: 25px;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(249, 115, 22, 0.05);
     border-radius: 15px;
 }
 
 /* Specific Colors for Options */
 .btn-eating {
-    background: #10b981 !important; /* Vivid Green */
+    background: var(--green) !important;
     color: white;
     margin-bottom: 8px;
 }
 
 .btn-skip {
-    background: #ef4444 !important; /* Vivid Red */
+    background: #ef4444 !important;
     color: white;
 }
 
 .btn-eating:hover, .btn-skip:hover {
-    filter: brightness(1.2);
+    filter: brightness(1.08);
     transform: scale(1.02);
 }
 
 .recorded-msg {
     display: none;
-    color: #10b981;
+    color: var(--green);
     font-size: 0.9rem;
     margin-top: 5px;
     font-weight: bold;
 }
 
 .sweet-dish span {
-    color: #10b981;
+    color: var(--amber);
     font-weight: bold;
 }
 
-/* Color Palette */
-:root {
-    --purple: #7e22ce;
-    --green: #10b981;
-    --red: #ef4444;
-    --dark-slate: #0f172a;
-    --glass: rgba(15, 23, 42, 0.8);
-    --border: rgba(255, 255, 255, 0.1);
-}
-
-/* MESSMIND COLOR PALETTE - Vibrant & Happy */
-:root {
-    /* Main Theme Colors */
-    --purple: #7e22ce;   /* Deep, royal purple for main actions */
-    --green: #10b981;    /* Vibrant Emerald for success/counts */
-    --red: #ef4444;      /* Brilliant ruby for predictions/skips */
-    --yellow: #f59e0b;   /* Amber for highlights/sweets */
-    
-    /* Structure & Glass Colors */
-    --slate-bg: #020617;     /* Deep slate (almost black) for contrast */
-    --slate-dark: #111827;   /* For elements slightly lighter than bg */
-    --slate-muted: #94a3b8;  /* For muted text */
-    --glass: rgba(17, 24, 39, 0.7); /* Standard glass card bg */
-    --glass-border: rgba(255, 255, 255, 0.1);
-    
-    /* General Text */
-    --text-main: #f8fafc;
-}
-
-/* Base Body Style with Kitchen-Themed Image and Overlay */
-.manager-bg {
-    background: linear-gradient(rgba(139, 69, 19, 0.7), rgba(139, 69, 19, 0.7)), 
-                url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?q=80&w=2000') no-repeat center center fixed;
-    background-size: cover;
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    margin: 0; min-height: 100vh;
-}
-
-/* Main Dashboard Layout */
-.admin-wrapper { display: flex; height: 100vh; }
-
-.sidebar {
-    width: 320px;
-    background: var(--slate-dark);
-    backdrop-filter: blur(10px);
-    border-right: 1px solid var(--glass-border);
-    padding: 1.5rem;
-    display: flex; flex-direction: column;
-}
-
-.main-content {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-}
-
-/* Glassmorphism Card Style - Basis for Tool, Prediction, Stats */
-.glass-card {
-    background: var(--glass);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 2rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    position: relative; /* CRITICAL for corner placement */
-    overflow: hidden; /* CRITICAL for corner placement */
-}
-
-/* 👨‍🍳 CHEF ACCENT: A semi-transparent chef hat in the top right corner of glass cards 👨‍🍳 */
-.glass-card::before {
-    content: "👨‍🍳";
-    font-size: 3rem;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    opacity: 0.15;
-    pointer-events: none;
-    z-index: 0;
-}
-
-h1 span, h2 span { color: var(--purple); font-weight: 800; }
-
-/* Dashboard Header & Logout */
-.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.logout-btn { background: transparent; border: 1px solid #444; color: #94a3b8; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-.logout-btn:hover { background: #444; color: white; }
-
-/* Grid for Tool and Monitoring */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-
-/* LIVE STATS AREA - Purple and Green */
-.stat-box h2 {
-    font-size: 4rem;
-    margin: 10px 0;
-    font-weight: 800;
-}
-
-.label { color: var(--slate-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 600; }
-
-#pred-val { color: var(--purple); }
-#live-count { color: var(--green); }
-
-/* PLATE FORECAST TOOL - The Purple Action Area */
-.btn { border-radius: 12px; font-weight: 700; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: none; cursor: pointer; width: 100%; margin-top: 1rem; }
-.btn-primary {
-    background: linear-gradient(135deg, #7e22ce 0%, #9333ea 100%);
-    color: white;
-    padding: 1rem;
-    box-shadow: 0 4px 15px rgba(126, 34, 206, 0.3);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(126, 34, 206, 0.4);
-}
-
-input[type="range"] {
-    accent-color: var(--purple);
-    width: 100%;
-    margin: 15px 0;
-}
-
-select {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    color: white;
-    border-radius: 10px;
-    padding: 0.8rem;
-    margin-bottom: 10px;
-    width: 100%;
-}
-
-/* THE SIDEBAR MENU - Emerald Accents */
-.sidebar h2 { font-size: 1.5rem; color: #f8fafc; }
+/* Sidebar menu list (legacy dashboard layout) */
+.sidebar h2 { font-size: 1.5rem; color: var(--text-heading); }
 .sidebar h2 span { color: var(--green); }
 .menu-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(249, 115, 22, 0.05);
     border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1rem;
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border);
     transition: 0.3s;
 }
 
 .day-label { color: var(--green); font-weight: 700; text-transform: uppercase; }
-.sweet-label { color: var(--yellow); font-size: 0.9rem; margin-top: 5px; }
+.sweet-label { color: var(--amber); font-size: 0.9rem; margin-top: 5px; }
 
-/* THE PREDICTION TABLE - Ruby and Emerald Highlights */
-th { text-align: left; padding: 1rem; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; }
-td { padding: 1rem; border-top: 1px solid var(--glass-border); }
+/* ==========================================================================
+   Motion & interaction — shared across every page
+   ========================================================================== */
 
-/* Specifically high-lighting numbers in the table */
-.pred-highlight { color: var(--purple); font-weight: 700; }
-.verified-highlight { color: var(--green); font-weight: 700; }
-
-/* MESSMIND COLOR PALETTE - Vibrant & Happy */
-:root {
-    /* Main Theme Colors */
-    --purple: #7e22ce;   /* Deep, royal purple for main actions */
-    --green: #10b981;    /* Vibrant Emerald for success/counts */
-    --red: #ef4444;      /* Brilliant ruby for predictions/skips */
-    --yellow: #f59e0b;   /* Amber for highlights/sweets */
-    
-    /* Structure & Glass Colors */
-    --slate-bg: #020617;     /* Deep slate (almost black) for contrast */
-    --slate-dark: #111827;   /* For elements slightly lighter than bg */
-    --slate-muted: #94a3b8;  /* For muted text */
-    --glass: rgba(17, 24, 39, 0.7); /* Standard glass card bg */
-    --glass-border: rgba(255, 255, 255, 0.1);
-    
-    /* General Text */
-    --text-main: #f8fafc;
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Base Body Style with Kitchen-Themed Image and Overlay */
-.manager-bg {
-    background: linear-gradient(rgba(139, 69, 19, 0.7), rgba(139, 69, 19, 0.7)), 
-                url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?q=80&w=2000') no-repeat center center fixed;
-    background-size: cover;
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    margin: 0; min-height: 100vh;
+/* transform doesn't apply to table-row elements per spec — plain fade for <tr> */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-/* Main Dashboard Layout */
-.admin-wrapper { display: flex; height: 100vh; }
-
-.sidebar {
-    width: 320px;
-    background: var(--slate-dark);
-    backdrop-filter: blur(10px);
-    border-right: 1px solid var(--glass-border);
-    padding: 1.5rem;
-    display: flex; flex-direction: column;
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.main-content {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
+@keyframes shimmer {
+    0% { background-position: -300% 0; }
+    100% { background-position: 300% 0; }
 }
 
-/* Glassmorphism Card Style - Basis for Tool, Prediction, Stats */
-.glass-card {
-    background: var(--glass);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 2rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    position: relative; /* CRITICAL for corner placement */
-    overflow: hidden; /* CRITICAL for corner placement */
+/* Cards ease in on load instead of just appearing */
+.glass-card, .form-section, .section, .stat-card, .menu-card-large {
+    animation: fadeSlideUp 0.5s ease both;
 }
 
-/* 👨‍🍳 CHEF ACCENT: A semi-transparent chef hat in the top right corner of glass cards 👨‍🍳 */
-.glass-card::before {
-    content: "👨‍🍳";
-    font-size: 3rem;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    opacity: 0.15;
-    pointer-events: none;
-    z-index: 0;
+/* Small stagger so multi-card rows/grids don't pop in as one flat block */
+.stats-grid > *:nth-child(2) { animation-delay: 0.08s; }
+.stats-section > *:nth-child(2) { animation-delay: 0.06s; }
+.stats-section > *:nth-child(3) { animation-delay: 0.12s; }
+.menu-grid > *:nth-child(2) { animation-delay: 0.04s; }
+.menu-grid > *:nth-child(3) { animation-delay: 0.08s; }
+.menu-grid > *:nth-child(4) { animation-delay: 0.12s; }
+.menu-grid > *:nth-child(5) { animation-delay: 0.16s; }
+.menu-grid > *:nth-child(6) { animation-delay: 0.2s; }
+.menu-grid > *:nth-child(7) { animation-delay: 0.24s; }
+
+/* Cards lift slightly on hover — reads as "alive" without being distracting */
+.glass-card, .form-section, .section, .stat-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.glass-card:hover, .form-section:hover, .section:hover, .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px -18px rgba(120, 72, 32, 0.3);
 }
 
-h1 span, h2 span { color: var(--purple); font-weight: 800; }
+/* Buttons: press feedback in addition to the existing hover-lift */
+.btn:active { transform: scale(0.97); }
 
-/* Dashboard Header & Logout */
-.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.logout-btn { background: transparent; border: 1px solid #444; color: #94a3b8; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-.logout-btn:hover { background: #444; color: white; }
+/* Success/error banners slide in instead of snapping to visible */
+.success-msg, .error-msg { animation: slideDown 0.3s ease; }
 
-/* Grid for Tool and Monitoring */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-
-/* LIVE STATS AREA - Purple and Green */
-.stat-box h2 {
-    font-size: 4rem;
+/* Skeleton loading placeholder — swap in for "Loading..." text */
+.skeleton-line {
+    height: 14px;
+    border-radius: 6px;
     margin: 10px 0;
-    font-weight: 800;
+    background: linear-gradient(90deg,
+        rgba(120, 72, 32, 0.08) 25%,
+        rgba(120, 72, 32, 0.16) 37%,
+        rgba(120, 72, 32, 0.08) 63%);
+    background-size: 300% 100%;
+    animation: shimmer 1.4s ease infinite;
 }
 
-.label { color: var(--slate-muted); text-transform: uppercase; font-size: 0.85rem; font-weight: 600; }
-
-#pred-val { color: var(--purple); }
-#live-count { color: var(--green); }
-
-/* PLATE FORECAST TOOL - The Purple Action Area */
-.btn { border-radius: 12px; font-weight: 700; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: none; cursor: pointer; width: 100%; margin-top: 1rem; }
-.btn-primary {
-    background: linear-gradient(135deg, #7e22ce 0%, #9333ea 100%);
-    color: white;
-    padding: 1rem;
-    box-shadow: 0 4px 15px rgba(126, 34, 206, 0.3);
+/* Centralized nav tabs (identical markup across pages) with a gliding
+   active/hover underline. menu.html defines its own gold/serif variant
+   after this stylesheet loads, so it overrides these by source order. */
+.nav-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
 }
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(126, 34, 206, 0.4);
+.nav-tabs a {
+    position: relative;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background 0.25s ease, color 0.25s ease;
 }
-
-input[type="range"] {
-    accent-color: var(--purple);
-    width: 100%;
-    margin: 15px 0;
+.nav-tabs a::after {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: -1px;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
 }
+.nav-tabs a:hover, .nav-tabs a.active { background: var(--primary-soft); color: var(--primary); }
+.nav-tabs a:hover::after, .nav-tabs a.active::after { transform: scaleX(1); }
 
-select {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    color: white;
-    border-radius: 10px;
-    padding: 0.8rem;
-    margin-bottom: 10px;
-    width: 100%;
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
 }
-
-/* THE SIDEBAR MENU - Emerald Accents */
-.sidebar h2 { font-size: 1.5rem; color: #f8fafc; }
-.sidebar h2 span { color: var(--green); }
-.menu-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--glass-border);
-    transition: 0.3s;
-}
-
-.day-label { color: var(--green); font-weight: 700; text-transform: uppercase; }
-.sweet-label { color: var(--yellow); font-size: 0.9rem; margin-top: 5px; }
-
-/* THE PREDICTION TABLE - Ruby and Emerald Highlights */
-th { text-align: left; padding: 1rem; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; }
-td { padding: 1rem; border-top: 1px solid var(--glass-border); }
-
-/* Specifically high-lighting numbers in the table */
-.pred-highlight { color: var(--purple); font-weight: 700; }
-.verified-highlight { color: var(--green); font-weight: 700; }

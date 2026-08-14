@@ -1,3 +1,16 @@
+// Animate a stat number counting up from its current value to `target`
+function animateCount(el, target, duration = 600) {
+    const start = parseFloat(el.textContent) || 0;
+    if (start === target) return;
+    const startTime = performance.now();
+    function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        el.textContent = Math.round(start + (target - start) * progress);
+        if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
 async function getPrediction() {
     const data = {
         day: document.getElementById('day').value,
@@ -18,16 +31,16 @@ async function getPrediction() {
             return;
         }
 
-        document.getElementById('pred-val').innerText = res.plates;
-        document.getElementById('live-count').innerText = res.verified;
+        animateCount(document.getElementById('pred-val'), res.plates);
+        animateCount(document.getElementById('live-count'), res.verified);
 
         const tbody = document.getElementById('history-body');
-        tbody.innerHTML = res.history.map(row => `
-            <tr>
+        tbody.innerHTML = res.history.map((row, i) => `
+            <tr style="animation: fadeIn 0.3s ease both; animation-delay: ${Math.min(i * 0.03, 0.3)}s;">
                 <td>${row.time}</td>
                 <td>${row.meal}</td>
-                <td style="color: #6366f1;">${row.predicted}</td>
-                <td style="color: #10b981;">${row.verified}</td>
+                <td style="color: #f97316;">${row.predicted}</td>
+                <td style="color: #16a34a;">${row.verified}</td>
             </tr>
         `).join('');
     } catch (error) {
@@ -59,11 +72,24 @@ const menuData = {
 
 // Initialize menu data from server response
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch menu data from the manager route or set it directly
+    // Fetch menu data from the manager route or set it directly.
+    // Not every page that includes this script has a #day select (e.g. the
+    // student portal doesn't), so guard before attaching the listener.
     const daySelect = document.getElementById('day');
-    daySelect.addEventListener('change', function() {
-        showMenuParchment(this.value);
-    });
+    if (daySelect) {
+        daySelect.addEventListener('change', function() {
+            showMenuParchment(this.value);
+        });
+    }
+
+    // Give the manager dashboard's "Live Verified" number a count-up on load
+    // instead of just appearing with its server-rendered value.
+    const liveCountEl = document.getElementById('live-count');
+    if (liveCountEl) {
+        const target = parseInt(liveCountEl.textContent, 10) || 0;
+        liveCountEl.textContent = '0';
+        animateCount(liveCountEl, target, 800);
+    }
 });
 
 // Show parchment letter with menu

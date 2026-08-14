@@ -5,8 +5,8 @@
     <title>MessMind | Login</title>
     <style>
         body.login-page {
-            background: radial-gradient(circle at top, #f8fafc, #e2e8f0);
-            color: #0f172a;
+            background: radial-gradient(circle at top, #fef3e8, #fdf8f3);
+            color: #2d2a26;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             min-height: 100vh;
             margin: 0;
@@ -14,38 +14,38 @@
 
         .glass-card {
             background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(28, 25, 23, 0.08);
+            box-shadow: 0 24px 70px rgba(120, 72, 32, 0.1);
         }
 
-        body.manager-bg .glass-card::before {
+        body.login-page .glass-card::before {
             display: none;
         }
 
         .site-logo {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(249, 115, 22, 0.08);
         }
 
         .site-logo-text {
-            color: #111827;
+            color: #1c1917;
         }
 
         .site-logo-subtitle {
-            color: #64748b;
+            color: #78716c;
         }
 
         h1, h1 span {
-            color: #0f172a;
+            color: #1c1917;
         }
 
         .error-msg { color: #dc2626; font-size: 0.85rem; margin-top: 0.3rem; display: none; }
-        .success-msg { color: #059669; font-size: 0.85rem; margin-top: 0.3rem; display: none; }
+        .success-msg { color: #16a34a; font-size: 0.85rem; margin-top: 0.3rem; display: none; }
 
         input, select {
-            background: #f8fafc !important;
-            border: 1px solid #cbd5e1 !important;
-            color: #0f172a !important;
-            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+            background: #fffaf3 !important;
+            border: 1px solid #e7ddd0 !important;
+            color: #2d2a26 !important;
+            box-shadow: inset 0 1px 2px rgba(120, 72, 32, 0.06);
             border-radius: 12px !important;
             padding: 0.9rem !important;
             margin: 0.5rem 0 !important;
@@ -54,25 +54,25 @@
 
         select option {
             background: #ffffff;
-            color: #0f172a;
+            color: #2d2a26;
         }
 
         select:focus, input:focus {
             outline: none;
-            border-color: #4f46e5 !important;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+            border-color: #f97316 !important;
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.14);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
             color: #ffffff;
-            box-shadow: 0 10px 24px rgba(99, 102, 241, 0.18);
+            box-shadow: 0 10px 24px rgba(249, 115, 22, 0.2);
         }
 
-        a { color: #4f46e5; }
+        a { color: #ea580c; }
     </style>
 </head>
-<body class="flex-center manager-bg">
+<body class="flex-center login-page">
     <div class="glass-card" style="width: 380px;">
         <div class="site-header" style="justify-content:center; margin-bottom: 1rem;">
             <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="MessMind Logo" class="site-logo">
@@ -83,7 +83,7 @@
         </div>
         
         <div id="login-section">
-            <p style="color: #475569; text-align: center;">Access your analytics dashboard</p>
+            <p style="color: #57534e; text-align: center;">Access your analytics dashboard</p>
             <input type="text" id="login-userid" placeholder="User ID / Roll No">
             <div class="error-msg" id="login-userid-err"></div>
             
@@ -92,13 +92,13 @@
             
             <div id="login-error" class="error-msg" style="text-align: center;"></div>
             <button class="btn btn-primary" onclick="performLogin()" style="margin-top: 1rem;">Login</button>
-            <p style="color: #475569; text-align: center; font-size: 0.9rem; margin-top: 1.5rem;">
+            <p style="color: #57534e; text-align: center; font-size: 0.9rem; margin-top: 1.5rem;">
                 New here? <a href="#" onclick="toggleAuth()" style="color: var(--primary-glow);">Create Account</a>
             </p>
         </div>
 
         <div id="register-section" style="display: none;">
-            <p style="color: #475569; text-align: center;">Join the smart mess community</p>
+            <p style="color: #57534e; text-align: center;">Join the smart mess community</p>
             <input type="text" id="reg-fullname" placeholder="Full Name">
             <div class="error-msg" id="reg-fullname-err"></div>
             

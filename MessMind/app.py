@@ -1,4 +1,5 @@
-import datetime, pickle, json, os
+import datetime, pickle, json, os, re
+import requests
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -8,6 +9,25 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def local_path(filename):
     return os.path.join(BASE_DIR, filename)
+
+def load_env_file():
+    """Minimal .env loader (no python-dotenv dependency). Reads KEY=VALUE
+    lines from a .env file next to app.py and puts them into os.environ,
+    without overriding any variable already set in the real environment."""
+    env_path = local_path('.env')
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, _, value = line.partition('=')
+            key, value = key.strip(), value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+load_env_file()
 
 stats = {
     "Breakfast": {"eating": 0, "skipping": 0},
@@ -359,15 +379,42 @@ def send_message():
         return jsonify({'success': True, 'message': 'Message sent successfully'})
     return jsonify({'success': False, 'message': 'Error sending message'}), 500
 
+MESSAGE_VISIBLE_HOURS = 24  # how long a manager message stays on the home page
+
+def _parse_timestamp(ts):
+    try:
+        return datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+    except (KeyError, TypeError, ValueError):
+        return None
+
 @app.route('/get_messages')
 def get_messages():
+    """Messages shown on the home page (student portal) — only ones from the
+    last MESSAGE_VISIBLE_HOURS. Older messages still live in messages.json
+    and remain visible via /get_message_history."""
     if 'user_id' not in session:
         return jsonify({'success': False, 'message': 'Not logged in'}), 401
-    
+
     messages = load_messages()
-    # Return latest 10 messages
-    recent_messages = sorted(messages, key=lambda x: x['timestamp'], reverse=True)[:10]
-    return jsonify({'success': True, 'messages': recent_messages})
+    cutoff = datetime.datetime.now() - datetime.timedelta(hours=MESSAGE_VISIBLE_HOURS)
+
+    recent_messages = [
+        m for m in messages
+        if (parsed := _parse_timestamp(m.get('timestamp'))) is not None and parsed >= cutoff
+    ]
+    recent_messages.sort(key=lambda x: x['timestamp'], reverse=True)
+    return jsonify({'success': True, 'messages': recent_messages[:10]})
+
+@app.route('/get_message_history')
+def get_message_history():
+    """Full, unfiltered history of every manager message ever sent —
+    nothing is deleted when a message stops showing on the home page."""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    messages = load_messages()
+    history = sorted(messages, key=lambda x: x['timestamp'], reverse=True)[:100]
+    return jsonify({'success': True, 'messages': history})
 
 # Polls for Dish Voting
 POLLS_FILE = 'polls.json'
@@ -531,6 +578,236 @@ def get_poll_activity():
         'success': True,
         'data': activity[:20]
     })
+
+
+# --------------------------------------------------------------------------
+# Chatbot: rule-based assistant for mess-related queries
+# --------------------------------------------------------------------------
+DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+# Editable by the mess manager — no timing data existed elsewhere in the app,
+# so these are sensible defaults; update to match your hostel's actual mess hours.
+MESS_TIMINGS = {
+    "Breakfast": "7:30 AM - 9:30 AM",
+    "Lunch": "12:30 PM - 2:30 PM",
+    "Dinner": "7:30 PM - 9:30 PM"
+}
+
+def _menu_summary(day_idx):
+    m = MENU.get(day_idx, MENU[0])
+    return (f"{DAY_NAMES[day_idx]}: Breakfast - {m['Breakfast']}, Lunch - {m['Lunch']}, "
+            f"Dinner - {m['Dinner']}, Sweet - {m['Sweet']}")
+
+def _find_day_index(text):
+    for i, name in enumerate(DAY_NAMES):
+        if name.lower() in text:
+            return i
+    return None
+
+def _has_word(text, *words):
+    """Word-boundary match so short tokens (e.g. 'hi') don't match inside
+    unrelated words (e.g. 'which')."""
+    return any(re.search(r'\b' + re.escape(w) + r'\b', text) for w in words)
+
+def chatbot_reply(message, user_role):
+    text = message.lower().strip()
+    today_idx = datetime.datetime.now().weekday()
+    today_menu = MENU.get(today_idx, MENU[0])
+
+    if not text:
+        return "Please type a question — ask me about the menu, mess timings, notices, complaints or polls."
+
+    if _has_word(text, 'hi', 'hello', 'hey', 'namaste'):
+        return "Hello! I'm the MessMind Assistant 🤖. Ask me about today's menu, mess timings, notices, complaints, or dish polls."
+
+    if _has_word(text, 'help') or 'what can you' in text:
+        return ("I can help with:\n"
+                "• Today's / tomorrow's / any day's menu\n"
+                "• Mess timings\n"
+                "• Latest manager notices\n"
+                "• The most-voted dish in polls\n"
+                "• How to file a complaint or vote on a dish")
+
+    day_idx = _find_day_index(text)
+    if day_idx is not None:
+        return _menu_summary(day_idx)
+
+    if _has_word(text, 'tomorrow'):
+        return _menu_summary((today_idx + 1) % 7)
+
+    if _has_word(text, 'week') or 'full menu' in text or 'whole menu' in text:
+        return "\n".join(_menu_summary(i) for i in range(7))
+
+    if _has_word(text, 'sweet', 'dessert'):
+        return f"Today's sweet dish is {today_menu['Sweet']}."
+
+    if _has_word(text, 'breakfast'):
+        return f"Today's breakfast is {today_menu['Breakfast']} (served {MESS_TIMINGS['Breakfast']})."
+
+    if _has_word(text, 'lunch'):
+        return f"Today's lunch is {today_menu['Lunch']} (served {MESS_TIMINGS['Lunch']})."
+
+    if _has_word(text, 'dinner'):
+        return f"Today's dinner is {today_menu['Dinner']} (served {MESS_TIMINGS['Dinner']})."
+
+    if _has_word(text, 'time', 'timing', 'timings', 'hours', 'open', 'close'):
+        return (f"Mess timings:\n"
+                f"Breakfast: {MESS_TIMINGS['Breakfast']}\n"
+                f"Lunch: {MESS_TIMINGS['Lunch']}\n"
+                f"Dinner: {MESS_TIMINGS['Dinner']}")
+
+    if _has_word(text, 'notice', 'notices', 'announcement', 'message', 'update'):
+        messages = load_messages()
+        if not messages:
+            return "There are no manager notices right now."
+        recent = sorted(messages, key=lambda x: x['timestamp'], reverse=True)[:3]
+        return "\n".join(f"[{m['timestamp']}] {m['sender']}: {m['message']}" for m in recent)
+
+    if _has_word(text, 'complaint', 'complaints', 'feedback', 'issue', 'problem'):
+        if _has_word(text, 'file', 'submit', 'how', 'raise', 'lodge'):
+            return "You can file a complaint or feedback from the Feedback tab (/complaints page)."
+        if user_role == 'manager':
+            complaints = load_complaints()
+            return f"There are {len(complaints)} complaint(s) logged so far. Check the Feedback page for details."
+        return "Head to the Feedback tab to submit a complaint about mess food or service."
+
+    if _has_word(text, 'poll', 'polls', 'vote', 'voting', 'dish', 'dishes'):
+        polls = load_polls()
+        if not polls:
+            return "No dishes have been suggested or voted on yet. Head to the Polls page to suggest one!"
+        top_dish, top_data = max(polls.items(), key=lambda x: x[1]['votes'])
+        return f"The most-voted dish right now is '{top_dish}' with {top_data['votes']} vote(s). Visit the Polls page to vote!"
+
+    if _has_word(text, 'attendance', 'present', 'mark'):
+        return "You can mark your meal attendance (eating/skipping) from the Attendance tab on your student portal."
+
+    if _has_word(text, 'thank', 'thanks'):
+        return "You're welcome! 🍽️"
+
+    if _has_word(text, 'menu', 'food', 'eat', 'eating'):
+        return _menu_summary(today_idx)
+
+    return ("Sorry, I didn't quite get that. You can ask me about: today's/tomorrow's menu, "
+            "a specific day's menu, mess timings, latest notices, complaints, or dish polls.")
+
+# --------------------------------------------------------------------------
+# Chatbot: optional Groq-backed LLM layer (broader phrasing, still mess-only)
+# --------------------------------------------------------------------------
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
+GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+
+def _build_mess_context(user_role):
+    """Snapshot of live app data, handed to the LLM as grounding context so it
+    doesn't have to (and can't) invent menu items, notices, or poll results."""
+    today_idx = datetime.datetime.now().weekday()
+    lines = [f"Today is {DAY_NAMES[today_idx]}."]
+    lines.append("This week's menu:")
+    for i in range(7):
+        lines.append("  " + _menu_summary(i))
+
+    lines.append(f"Mess timings — Breakfast: {MESS_TIMINGS['Breakfast']}, "
+                 f"Lunch: {MESS_TIMINGS['Lunch']}, Dinner: {MESS_TIMINGS['Dinner']}.")
+
+    messages = load_messages()
+    if messages:
+        recent = sorted(messages, key=lambda x: x['timestamp'], reverse=True)[:3]
+        lines.append("Latest manager notices:")
+        for m in recent:
+            lines.append(f"  [{m['timestamp']}] {m['sender']}: {m['message']}")
+    else:
+        lines.append("There are no manager notices right now.")
+
+    polls = load_polls()
+    if polls:
+        top_dish, top_data = max(polls.items(), key=lambda x: x[1]['votes'])
+        lines.append(f"Most-voted dish in current polls: '{top_dish}' with {top_data['votes']} vote(s).")
+    else:
+        lines.append("No dishes have been suggested/voted on in polls yet.")
+
+    if user_role == 'manager':
+        lines.append(f"Open complaints logged: {len(load_complaints())}.")
+
+    return "\n".join(lines)
+
+def _build_system_prompt(user_role):
+    context = _build_mess_context(user_role)
+    return (
+        "You are the MessMind Assistant, a chatbot embedded in a hostel mess "
+        "management web app. You ONLY answer questions related to the hostel "
+        "mess: menus, meal timings, mess notices/announcements, complaints/"
+        "feedback, dish polls/voting, and meal attendance. General food/"
+        "nutrition questions are fine if reasonably tied to mess meals.\n\n"
+        "If the user asks something unrelated to the mess (e.g. coding, "
+        "homework, general trivia, current events), politely decline and "
+        "steer them back to mess-related topics — do not answer it.\n\n"
+        "Use the live data below as ground truth; never invent menu items, "
+        "notices, timings, or poll results that aren't in it. Keep replies "
+        "short and friendly, in plain text (no markdown).\n\n"
+        f"Current mess data:\n{context}\n\n"
+        f"The user talking to you is a {user_role or 'guest'}. "
+        "Guide students to /complaints to file feedback, /polls to vote on "
+        "dishes, and the Attendance tab to mark meals eaten/skipped."
+    )
+
+def groq_chat_reply(message, history, user_role):
+    """Returns the LLM's reply text, or None if the API is unavailable/misconfigured
+    so the caller can fall back to the rule-based responder."""
+    if not GROQ_API_KEY:
+        return None
+
+    messages = [{"role": "system", "content": _build_system_prompt(user_role)}]
+    for turn in history[-6:]:
+        role = turn.get('role')
+        content = (turn.get('content') or '').strip()
+        if role in ('user', 'assistant') and content:
+            messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": message})
+
+    try:
+        resp = requests.post(
+            GROQ_API_URL,
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": GROQ_MODEL,
+                "messages": messages,
+                "temperature": 0.4,
+                "max_tokens": 300
+            },
+            timeout=15
+        )
+        resp.raise_for_status()
+        return resp.json()['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print(f"Groq chatbot error, falling back to rule-based reply: {e}")
+        return None
+
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'message': 'Not logged in'}), 401
+
+    data = request.get_json(silent=True) or {}
+    user_message = data.get('message', '').strip()
+    history = data.get('history') or []
+
+    if not user_message:
+        return jsonify({'success': False, 'message': 'Message cannot be empty'}), 400
+
+    if not isinstance(history, list):
+        history = []
+
+    user_role = session.get('user_role')
+    reply = groq_chat_reply(user_message, history, user_role)
+    engine = 'groq'
+    if reply is None:
+        reply = chatbot_reply(user_message, user_role)
+        engine = 'rules'
+
+    return jsonify({'success': True, 'reply': reply, 'engine': engine})
 
 if __name__ == '__main__':
     app.run(debug=True)

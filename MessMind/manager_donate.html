@@ -5,18 +5,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>MessMind | Donate Leftover Food</title>
     <style>
-        .nav-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; flex-wrap: wrap; }
-        .nav-tabs a { color: #94a3b8; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s; }
-        .nav-tabs a:hover, .nav-tabs a.active { background: rgba(99, 102, 241, 0.2); color: #6366f1; }
         .page-container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
-        .glass-card { background: rgba(15,23,42,0.8); border: 1px solid rgba(99,102,241,0.2); border-radius: 18px; padding: 2rem; }
+        .glass-card { background: rgba(255,255,255,0.8); border: 1px solid rgba(249,115,22,0.2); border-radius: 18px; padding: 2rem; }
         .donation-panel { display: grid; gap: 1rem; }
         .donation-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-        .donation-actions button { border: 1px solid rgba(99,102,241,0.4); color: #e2e8f0; background: transparent; padding: 0.85rem 1rem; border-radius: 0.75rem; cursor: pointer; transition: background 0.25s ease; }
-        .donation-actions button.active, .donation-actions button:hover { background: rgba(99,102,241,0.2); }
-        .donation-map { width: 100%; min-height: 420px; border: 1px solid rgba(99,102,241,0.3); border-radius: 14px; overflow: hidden; }
-        .donation-panel input { width: 100%; padding: 0.9rem 1rem; border-radius: 0.75rem; border: 1px solid rgba(148,163,184,0.4); color: white; background: rgba(15,23,42,0.9); }
-        .donation-panel .donation-result { background: rgba(15,23,42,0.8); padding: 1rem; border-radius: 12px; border: 1px solid rgba(99,102,241,0.15); color: #cbd5e1; }
+        .donation-actions button { border: 1px solid rgba(249,115,22,0.4); color: #44403c; background: transparent; padding: 0.85rem 1rem; border-radius: 0.75rem; cursor: pointer; transition: background 0.25s ease; }
+        .donation-actions button.active, .donation-actions button:hover { background: rgba(249,115,22,0.2); }
+        .donation-map { width: 100%; min-height: 420px; border: 1px solid rgba(249,115,22,0.3); border-radius: 14px; overflow: hidden; }
+        .donation-panel input { width: 100%; padding: 0.9rem 1rem; border-radius: 0.75rem; border: 1px solid rgba(120,113,108,0.4); color: #2d2a26; background: rgba(255,255,255,0.9); }
+        .donation-panel .donation-result { background: rgba(255,255,255,0.8); padding: 1rem; border-radius: 12px; border: 1px solid rgba(249,115,22,0.15); color: #57534e; }
     </style>
 </head>
 <body class="manager-bg">
@@ -29,9 +26,9 @@
             </div>
         </div>
 
-        <div style="color: #94a3b8; text-align:center; margin-bottom:1rem;">
+        <div style="color: #78716c; text-align:center; margin-bottom:1rem;">
             Welcome, <strong>{{ full_name }}</strong> | 
-            <a href="/logout" style="color:red;">Logout</a>
+            <a href="/logout" style="color:#dc2626;">Logout</a>
         </div>
 
         <nav class="nav-tabs">
@@ -45,7 +42,7 @@
 
         <div class="glass-card">
             <h2>🍽️ Donate Leftover Food</h2>
-            <p style="color:#cbd5e1; margin-top:0.5rem;">Find nearby orphanages, gaushalas, or old age homes in your area and suggest food donation options.</p>
+            <p style="color:#57534e; margin-top:0.5rem;">Find nearby orphanages, gaushalas, or old age homes in your area and suggest food donation options.</p>
 
             <div class="donation-panel">
                 <div class="donation-actions">
@@ -85,7 +82,7 @@
             return `https://www.google.com/maps?q=${encoded}&z=14&output=embed`;
         }
 
-        function updateDonationStatus(message, color = '#cbd5e1') {
+        function updateDonationStatus(message, color = '#57534e') {
             const statusEl = document.getElementById('donation-status');
             statusEl.textContent = message;
             statusEl.style.color = color;
@@ -104,14 +101,14 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     mapFrame.src = createMapUrl(query, lat, lon);
-                    updateDonationStatus(`Showing nearby ${type.toLowerCase()} using your current location.`, '#a3e635');
+                    updateDonationStatus(`Showing nearby ${type.toLowerCase()} using your current location.`, '#16a34a');
                 }, () => {
                     mapFrame.src = createMapUrl(query);
-                    updateDonationStatus(`Unable to access location. Showing search results by keyword.`, '#facc15');
+                    updateDonationStatus(`Unable to access location. Showing search results by keyword.`, '#b45309');
                 });
             } else {
                 mapFrame.src = createMapUrl(query);
-                updateDonationStatus(`Showing nearby ${type.toLowerCase()} for "${locationInput || 'current location'}".`, '#a3e635');
+                updateDonationStatus(`Showing nearby ${type.toLowerCase()} for "${locationInput || 'current location'}".`, '#16a34a');
             }
         }
 
@@ -119,5 +116,6 @@
             selectDonationType('Orphanage');
         });
     </script>
+    <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
 </body>
 </html>
